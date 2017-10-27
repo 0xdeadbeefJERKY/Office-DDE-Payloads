@@ -20,5 +20,5 @@ Obfuscation and evasion techniques inspired by @_staaldraad
 (blog post link in References setion below). 
 
 ## References:
-https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
+https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/  
 https://staaldraad.github.io/2017/10/23/msword-field-codes/
