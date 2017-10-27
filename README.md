@@ -16,7 +16,7 @@ section below) to generate two malicious Word documents:
   attacker-controlled server (URL provided by user and baked
   into template-final.docx).
 
-Obfuscation and evasion techniques inspired by @_staaldraad
+Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad)
 (blog post link in References setion below). 
 
 ## References:
