@@ -3,7 +3,7 @@ Collection of scripts and templates to generate Office documents embedded with t
 
 ## Overview
 Leverages the macro-less DDE code execution technique described 
-by @_staaldraad and @0x5A1F (blog post link in References 
+by [@_staaldraad](https://twitter.com/_staaldraad) and [@0x5A1F](https://twitter.com/Saif_Sherei) (blog post link in References 
 section below) to generate two malicious Word documents:
 
 *template-final.docx*
@@ -20,5 +20,5 @@ Obfuscation and evasion techniques inspired by @_staaldraad
 (blog post link in References setion below). 
 
 ## References:
-(https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/)
-(https://staaldraad.github.io/2017/10/23/msword-field-codes/)
+https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
+https://staaldraad.github.io/2017/10/23/msword-field-codes/
