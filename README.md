@@ -1,23 +1,36 @@
 # Office-DDE-Payloads
-Collection of scripts and templates to generate Office documents embedded with the DDE, macro-less command execution technique.
 
 ## Overview
-Leverages the macro-less DDE code execution technique described 
+Collection of scripts and templates to generate Office documents embedded with the DDE, macro-less command execution technique described 
 by [@_staaldraad](https://twitter.com/_staaldraad) and [@0x5A1F](https://twitter.com/Saif_Sherei) (blog post link in [References](#references) 
-section below) to generate two malicious Word documents:
+section below). Best if used during red team engagements and/or phishing campaigns.
+
+Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad) (blog post link in [References](#references) setion below).
+
+## Usage
+If you'd like to insert a simple DDE command string into the payload document, run:
+
+    python wordDDE.py
+
+If you'd prefer to obfuscate the DDE command string by way of the {QUOTE} field code technique, run:
+
+    python wordDDE.py --obfuscate
+
+Both forms of usage will generate two Word documents:
 
 *template-final.docx*
-- This is the document sent to the target (e.g., via phishing).
-  The webSettings configured to pull DDE from payload-final.docx, 
-  which is hosted by a server specified by the user. 
+- The webSettings are configured to pull the DDE element from payload-final.docx or   payload-obfuscated-final.docx, which is hosted by a server specified by the user. 
 
-*payload-final.docx*
-- Contains user-provided DDE payload/command string. Hosted by
-  attacker-controlled server (URL provided by user and baked
-  into template-final.docx).
+*payload-final.docx* (not obfuscated)  
+*payload-obfuscated-final.docx* (obfuscated)
+- Contains user-provided DDE payload/command string. Hosted by user-controlled    server (URL provided by user and baked into template-final.docx).
 
-Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad)
-(blog post link in [References](#references) setion below). 
+## Delivery
+By default, the user then has two standard methods of payload delivery, described below:
+
+1. Host the payload Office document on a user-controlled server (pointed to by the provided URL). Customize/stylize the template document and send directly to the desired target(s). This will trigger a remote reference to the payload document, ultimately pulling and executing the DDE command string.
+
+2. Customize/Stylize the payload document and send directly to the desired target(s).
 
 ## References
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/  
