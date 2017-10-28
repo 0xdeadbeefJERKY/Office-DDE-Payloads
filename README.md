@@ -15,7 +15,7 @@ Insert a simple (unobfuscated) DDE command string into the payload document:
 Insert an obfuscated DDE command string by way of the {QUOTE} field code technique into the payload document:
 
     python ddeword.py --obfuscate
-### **<span style="color:red">NOTE:** *The obfuscated payload will elicit three sets of prompts to the user instead of one. Furthermore, the first set of prompts after the "update links" prompt does not update properly and cannot execute the DDE element. The second and third prompts will trigger the payload.*</span>
+### **NOTE:** *The obfuscated payload will elicit three sets of prompts to the user instead of one. Furthermore, the first set of prompts after the "update links" prompt does not update properly and cannot execute the DDE element. The second and third prompts will trigger the payload.*
 
 Both forms of usage will generate two Word documents:
 
