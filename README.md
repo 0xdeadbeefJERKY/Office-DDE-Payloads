@@ -10,11 +10,11 @@ Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.co
 ## Usage
 If you'd like to insert a simple DDE command string into the payload document, run:
 
-    python wordDDE.py
+    python ddeword.py
 
 If you'd prefer to obfuscate the DDE command string by way of the {QUOTE} field code technique, run:
 
-    python wordDDE.py --obfuscate
+    python ddeword.py --obfuscate
 
 Both forms of usage will generate two Word documents:
 
