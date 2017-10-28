@@ -33,8 +33,12 @@ By default, the user then has two standard methods of payload delivery, describe
 
 2. Customize/Stylize the payload document and send directly to the desired target(s).
 
+**NOTE:** *Be sure to remove personal/identifying information from the documents before hosting and sending to target (e.g., by way of the File --> Inspect Document functionality).*
+
 ## To-Do
-- Fix for first set of link update prompts in the obfuscated payload 
+- The obfuscated payload, by design, elicits three sets of prompts that are displayed to the user. For some reason, the first set of prompts don't display the provided DDE command string, but rather "!Unexpected end of formula". Need to devise fix for this.
+- Add more obfuscation techniques
+- Create option for user to choose prepackaged DDE command strings
 
 ## References
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/  
