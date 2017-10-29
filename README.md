@@ -15,7 +15,8 @@ Insert a simple (unobfuscated) DDE command string into the payload document:
 Insert an obfuscated DDE command string by way of the {QUOTE} field code technique into the payload document:
 
     python ddeword.py --obfuscate
-**NOTE:** *The obfuscated payload will elicit three sets of prompts to the user instead of one. Furthermore, the first set of prompts after the "update links" prompt does not update properly and cannot execute the DDE element. The second and third prompts will trigger the payload.*
+
+**NOTE:** *When leveraging the template doc to link/reference the payload doc (by way of the --obfuscate trigger), do not use the DDEAUTO element in place of the DDE element. This will (1) elicit three sets of prompts to the user and (2) disrupt/corrupt the first set of prompts to display "!Unexpected end of formula" and fail the execution of the DDE command string. For some reason, DDEAUTO does not play well with the updateFields value in word/settings.xml.*
 
 Both forms of usage will generate two Word documents:
 
@@ -36,7 +37,6 @@ By default, the user then has two standard methods of payload delivery, describe
 **NOTE:** *Be sure to remove personal/identifying information from the documents before hosting and sending to target (e.g., by way of the File --> Inspect Document functionality).*
 
 ## To-Do
-- The obfuscated payload, by design, elicits three sets of prompts that are displayed to the user. For some reason, the first set of prompts don't display the provided DDE command string, but rather "!Unexpected end of formula". Need to devise fix for this.
 - Add more obfuscation techniques
 - Create option for user to choose prepackaged DDE command strings
 
