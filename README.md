@@ -34,7 +34,7 @@ By default, the user then has two standard methods of payload delivery, describe
 
 2. Customize/Stylize the payload document and send directly to the desired target(s).
 
-**NOTE:** *Be sure to remove personal/identifying information from the documents before hosting and sending to target (e.g., by way of the File --> Inspect Document functionality).*
+**NOTE:** *Be sure to remove personal/identifying information from the documents before hosting and sending to target (e.g., by way of the File --> Inspect Document functionality). This has already been applied to the docs in 'templates', but it's always good practice to confirm.*
 
 ## To-Do
 - Add more obfuscation techniques

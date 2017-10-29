@@ -80,9 +80,9 @@ def gen_payload(obfuscate):
     
     """
     # Example set of DDE arguments to form payload
-    "C:\\Program\\Microsoft\\Office\\MSWord.exe\\..\\..\\..\\..\\Windows\\System32\\cmd.exe"
-    "/c calc.exe"
-    "for security reasons"
+    C:\\Programs\\Microsoft\\Office\\MSWord.exe\\..\\..\\..\\..\\Windows\\System32\\cmd.exe
+    /c calc.exe
+    for security reasons
     """
 
     # Obfuscate provided DDE payload (if enabled)
@@ -117,6 +117,10 @@ def gen_payload(obfuscate):
         return payload, targetsvr
 
 if __name__ == "__main__":
+    # Create 'out' directory
+    if not os.path.exists('out'):
+        os.makedirs('out')
+
     # Parse arguments from command-line
     obfuscate = arg_parse()
     
