@@ -5,7 +5,7 @@ Collection of scripts and templates to generate Word documents embedded with the
 by [@_staaldraad](https://twitter.com/_staaldraad) and [@0x5A1F](https://twitter.com/Saif_Sherei) (blog post link in [References](#references) 
 section below). Intended for use during sanctioned red team engagements and/or phishing campaigns.
 
-Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad) (blog post link in [References](#references) setion below).
+Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad) (blog post link in [References](#references) section below).
 
 ## Usage
 Insert a simple (unobfuscated) DDE command string into the payload document:

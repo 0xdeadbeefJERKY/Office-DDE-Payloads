@@ -38,6 +38,9 @@ Both forms of usage will generate two Word documents:
   user-controlled server (URL provided by user and baked into 
   template-final.docx).
 
+Obfuscation and evasion techniques inspired by @_staaldraad 
+(blog post link in References section below).
+
 References:
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
 https://staaldraad.github.io/2017/10/23/msword-field-codes/
