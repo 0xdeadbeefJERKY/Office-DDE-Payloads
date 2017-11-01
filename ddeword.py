@@ -14,15 +14,22 @@ Overview:
 Leverages the macro-less DDE code execution technique described 
 by @_staaldraad and @0x5A1F (blog post link in References 
 section below) to generate two malicious Word documents:
+
 Usage:
 Insert a simple (unobfuscated) DDE command string into the 
 payload document:
+
     python ddeword.py
+
 Insert an obfuscated DDE command string by way of the {QUOTE} 
 field code technique into the payload document:
+
     python ddeword.py --obfuscate
+
 Both forms of usage will generate two Word documents:
+
 *out/template-final.docx*
+
 - The webSettings are configured to pull the DDE element from 
   payload-final.docx or   payload-obfuscated-final.docx, which 
   is hosted by a server specified by the user. 
@@ -33,9 +40,11 @@ Both forms of usage will generate two Word documents:
   template-final.docx).
 Obfuscation and evasion techniques inspired by @_staaldraad 
 (blog post link in References section below).
+
 References:
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
 https://staaldraad.github.io/2017/10/23/msword-field-codes/
+
 Additional Thanks:
 @ryHanson
 @SecuritySift
@@ -104,7 +113,7 @@ def gen_payload(obfuscate):
 
     # Prompt user for server hosting payload Office document (referenced by 'template')
     # e.g., http://localhost:8000
-    targetsvr = input("[-] Enter server URL (hosting payload Word file): ")
+    targetsvr = raw_input("[-] Enter server URL (hosting payload Word file): ")
     if obfuscate:
         targetsvr = targetsvr + '/payload-obfuscated-final.docx'
     else:
