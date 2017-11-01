@@ -29,15 +29,16 @@ field code technique into the payload document:
 Both forms of usage will generate two Word documents:
 
 *out/template-final.docx*
-
 - The webSettings are configured to pull the DDE element from 
   payload-final.docx or   payload-obfuscated-final.docx, which 
   is hosted by a server specified by the user. 
+
 *out/payload-final.docx* (not obfuscated)  
 *out/payload-obfuscated-final.docx* (obfuscated)
 - Contains user-provided DDE payload/command string. Hosted by
   user-controlled server (URL provided by user and baked into 
   template-final.docx).
+
 Obfuscation and evasion techniques inspired by @_staaldraad 
 (blog post link in References section below).
 
