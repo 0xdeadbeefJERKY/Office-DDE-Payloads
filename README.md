@@ -8,6 +8,10 @@ section below). Intended for use during sanctioned red team engagements and/or p
 Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad) (blog post link in [References](#references) section below).
 
 ## Usage
+Install dependencies:
+
+    pip install -r requirements.txt
+
 Insert a simple (unobfuscated) DDE command string into the payload document:
 
     python ddeword.py
