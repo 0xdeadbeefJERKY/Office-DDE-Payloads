@@ -17,6 +17,11 @@ Insert a simple (unobfuscated) DDE command string into the Excel payload documen
 
     python ddeword.py
 
+This will generate one Excel document:
+
+*out/payload-final.xlsx*
+- Contains user-provided DDE payload/command string. 
+
 ### Delivery
 By default, the user then has one standard methods of payload delivery, described below:
 
