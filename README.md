@@ -1,22 +1,33 @@
 # Office-DDE-Payloads
 
 ## Overview
-Collection of scripts and templates to generate Word documents embedded with the DDE, macro-less command execution technique described 
+Collection of scripts and templates to generate Word and Excel documents embedded with the DDE, macro-less command execution technique described 
 by [@_staaldraad](https://twitter.com/_staaldraad) and [@0x5A1F](https://twitter.com/Saif_Sherei) (blog post link in [References](#references) 
 section below). Intended for use during sanctioned red team engagements and/or phishing campaigns.
 
-Obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad) (blog post link in [References](#references) section below).
+Word DDE obfuscation and evasion techniques inspired by [@_staaldraad](https://twitter.com/_staaldraad) (blog post link in [References](#references) section below).
 
-## Usage
-Install dependencies:
+**NOTE:** *Be sure to remove personal/identifying information from the documents before hosting and sending to target (e.g., by way of the File --> Inspect Document functionality). This has already been applied to the docs in 'templates', but it's always good practice to confirm.*
 
+## Install Dependencies
     pip install -r requirements.txt
 
-Insert a simple (unobfuscated) DDE command string into the payload document:
+## Usage (Excel)
+Insert a simple (unobfuscated) DDE command string into the Excel payload document:
 
     python ddeword.py
 
-Insert an obfuscated DDE command string by way of the {QUOTE} field code technique into the payload document:
+### Delivery
+By default, the user then has one standard methods of payload delivery, described below:
+
+1. Customize/Stylize the Excel payload document and send directly to the desired target(s).
+
+## Usage (Word)
+Insert a simple (unobfuscated) DDE command string into the Word payload document:
+
+    python ddeword.py
+
+Insert an obfuscated DDE command string by way of the {QUOTE} field code technique into the Word payload document:
 
     python ddeword.py --obfuscate
 
@@ -31,22 +42,23 @@ Both forms of usage will generate two Word documents:
 *out/payload-obfuscated-final.docx* (obfuscated)
 - Contains user-provided DDE payload/command string. Hosted by user-controlled    server (URL provided by user and baked into template-final.docx).
 
-## Delivery
+### Delivery
 By default, the user then has two standard methods of payload delivery, described below:
 
 1. Host the payload Word document on a user-controlled server (pointed to by the provided URL). Customize/stylize the template document and send directly to the desired target(s). This will trigger a remote reference to the payload document, ultimately pulling and executing the DDE command string.
 
-2. Customize/Stylize the payload document and send directly to the desired target(s).
-
-**NOTE:** *Be sure to remove personal/identifying information from the documents before hosting and sending to target (e.g., by way of the File --> Inspect Document functionality). This has already been applied to the docs in 'templates', but it's always good practice to confirm.*
+2. Customize/Stylize the Word payload document and send directly to the desired target(s).
 
 ## To-Do
-- Add more obfuscation techniques
+- Research obfuscation/evasion techniques for both Excel and Word
+- Add module for Outlook DDE payload generation
 - Create option for user to choose prepackaged DDE command strings
 
 ## References
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/  
 https://staaldraad.github.io/2017/10/23/msword-field-codes/
+http://www.exploresecurity.com/from-csv-to-cmd-to-qwerty/
+https://sensepost.com/blog/2016/powershell-c-sharp-and-dde-the-power-within/
 
 ## Additional Thanks
 [@ryHanson](https://twitter.com/ryhanson)  
