@@ -15,7 +15,7 @@ Word DDE obfuscation and evasion techniques inspired by [@_staaldraad](https://t
 ## Usage (Excel)
 Insert a simple (unobfuscated) DDE command string into the Excel payload document:
 
-    python ddeword.py
+    python ddeexcel.py
 
 This will generate one Excel document:
 
@@ -55,7 +55,7 @@ By default, the user then has two standard methods of payload delivery, describe
 2. Customize/Stylize the Word payload document and send directly to the desired target(s).
 
 ## To-Do
-- Research obfuscation/evasion techniques for both Excel and Word
+- Research obfuscation/evasion techniques for both Excel and Outlook
 - Add module for Outlook DDE payload generation
 - Create option for user to choose prepackaged DDE command strings
 
