@@ -61,18 +61,18 @@ By default, the user then has two standard methods of payload delivery, describe
 - Create option for user to choose prepackaged DDE command strings
 
 ## References
-https://www.contextis.com/blog/comma-separated-vulnerabilities
-http://www.exploresecurity.com/from-csv-to-cmd-to-qwerty/
-https://sensepost.com/blog/2016/powershell-c-sharp-and-dde-the-power-within/
+https://www.contextis.com/blog/comma-separated-vulnerabilities  
+http://www.exploresecurity.com/from-csv-to-cmd-to-qwerty/  
+https://sensepost.com/blog/2016/powershell-c-sharp-and-dde-the-power-within/  
 https://sensepost.com/blog/2017/macro-less-code-exec-in-msword/  
-https://staaldraad.github.io/2017/10/23/msword-field-codes/
-https://posts.specterops.io/reviving-dde-using-onenote-and-excel-for-code-execution-d7226864caee
+https://staaldraad.github.io/2017/10/23/msword-field-codes/  
+https://posts.specterops.io/reviving-dde-using-onenote-and-excel-for-code-execution-d7226864caee  
 
 ## Additional Thanks
 [@ryHanson](https://twitter.com/ryhanson)  
 [@SecuritySift](https://twitter.com/securitysift)  
-[@GossiTheDog](https://twitter.com/gossithedog)
-[@enigma0x3](https://twitter.com/enigma0x3)
-[@albinowax](https://twitter.com/albinowax)
-[@exploresecurity](https://twitter.com/exploresecurity)
-[@decode141](https://twitter.com/decode141)
+[@GossiTheDog](https://twitter.com/gossithedog)  
+[@enigma0x3](https://twitter.com/enigma0x3)  
+[@albinowax](https://twitter.com/albinowax)  
+[@exploresecurity](https://twitter.com/exploresecurity)  
+[@decode141](https://twitter.com/decode141)  
