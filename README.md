@@ -56,6 +56,7 @@ By default, the user then has two standard methods of payload delivery, describe
 
 ## To-Do
 - Add a script to implement @enigma0x3's embedding Excel spreadsheet in OneNote technique
+- Add option to include various conditional statements intended to increase operational security (e.g., sandbox evasion)
 - Research obfuscation/evasion techniques for both Excel and Outlook
 - Add module for Outlook DDE payload generation
 - Create option for user to choose prepackaged DDE command strings
